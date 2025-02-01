@@ -1,0 +1,20 @@
+database:
+  type: mysql
+  host: localhost
+  port: 3306
+  username: root
+  password: secret
+  dbname: mydb
+
+storage:
+  local_path: /backups
+  cloud_type: s3
+  bucket: my-backup-bucket
+
+logging:
+  level: info
+  file: /var/log/backup-tool.log
+  format: json
+
+notification:
+  slack_webhook_url: https://hooks.slack.com/services/...
