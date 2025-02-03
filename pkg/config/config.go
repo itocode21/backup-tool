@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/spf13/viper"
 )
@@ -41,17 +42,27 @@ type Config struct {
 
 func LoadConfig(path string) (*Config, error) {
 	viper.Reset() // Сбросить кэш
-	viper.SetConfigFile(path)
-	viper.AutomaticEnv() // Чтение переменных окружения
 
+	// Указываем путь к файлу конфигурации
+	viper.SetConfigFile(path)
+
+	// Включаем чтение переменных окружения
+	viper.AutomaticEnv()
+
+	// Устанавливаем префикс для переменных окружения (опционально)
+	viper.SetEnvPrefix("BACKUP_TOOL")
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+
+	// Чтение конфигурации из файла
 	if err := viper.ReadInConfig(); err != nil {
 		log.Printf("Failed to read config file: %v", err)
 		return nil, err
 	}
 
-	// Вывод всех загруженных ключей и значений
+	// Вывод всех загруженных ключей и значений для отладки
 	log.Println("All settings:", viper.AllSettings())
 
+	// Загрузка конфигурации в структуру
 	var cfg Config
 	if err := viper.Unmarshal(&cfg); err != nil {
 		log.Printf("Failed to unmarshal config: %v", err)
@@ -67,6 +78,31 @@ func LoadConfig(path string) (*Config, error) {
 	}
 	if cfg.Database.DBName == "" {
 		return nil, fmt.Errorf("database name is required")
+	}
+
+	// Проверка допустимых значений для database.type
+	validDatabaseTypes := map[string]bool{
+		"mysql":    true,
+		"postgres": true,
+	}
+	if !validDatabaseTypes[cfg.Database.Type] {
+		return nil, fmt.Errorf("invalid database type: %s", cfg.Database.Type)
+	}
+
+	// Проверка допустимых значений для logging.level
+	validLoggingLevels := map[string]bool{
+		"info":  true,
+		"debug": true,
+		"warn":  true,
+		"error": true,
+	}
+	if !validLoggingLevels[cfg.Logging.Level] {
+		return nil, fmt.Errorf("invalid logging level: %s", cfg.Logging.Level)
+	}
+
+	// Проверка других полей (при необходимости)
+	if cfg.Storage.CloudType != "s3" && cfg.Storage.CloudType != "gcs" {
+		return nil, fmt.Errorf("invalid cloud type: %s", cfg.Storage.CloudType)
 	}
 
 	return &cfg, nil
