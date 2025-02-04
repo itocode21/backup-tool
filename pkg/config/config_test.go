@@ -34,13 +34,19 @@ func TestLoadConfigFromFile(t *testing.T) {
 
 func TestLoadConfigFromEnv(t *testing.T) {
 	// Устанавливаем переменные окружения
-	os.Setenv("DATABASE_HOST", "localhost")
-	os.Setenv("STORAGE_LOCAL_PATH", "/backups")
-	os.Setenv("LOGGING_LEVEL", "info")
+	os.Setenv("BACKUP_TOOL_DATABASE_HOST", "localhost")
+	os.Setenv("BACKUP_TOOL_STORAGE_LOCAL_PATH", "/backups")
+	os.Setenv("BACKUP_TOOL_LOGGING_LEVEL", "info")
+
+	// Очищаем переменные окружения после завершения теста
+	t.Cleanup(func() {
+		os.Unsetenv("BACKUP_TOOL_DATABASE_HOST")
+		os.Unsetenv("BACKUP_TOOL_STORAGE_LOCAL_PATH")
+		os.Unsetenv("BACKUP_TOOL_LOGGING_LEVEL")
+	})
 
 	// Загружаем конфигурацию
 	cfg, err := LoadConfig("test_config.yaml")
-
 	if err != nil {
 		t.Fatalf("Failed to load config: %v", err)
 	}
@@ -56,6 +62,7 @@ func TestLoadConfigFromEnv(t *testing.T) {
 		t.Errorf("Expected logging level 'info', got '%s'", cfg.Logging.Level)
 	}
 }
+
 func TestLoadConfigMissingRequiredFields(t *testing.T) {
 	// Указываем путь к тестовому файлу конфигурации с отсутствующими обязательными полями
 	_, err := LoadConfig("test_config_missing_fields.yaml")
@@ -77,8 +84,14 @@ func TestLoadConfigInvalidValues(t *testing.T) {
 	os.Setenv("BACKUP_TOOL_DATABASE_TYPE", "invalid_db_type")
 	os.Setenv("BACKUP_TOOL_LOGGING_LEVEL", "invalid_level")
 
+	// Очищаем переменные окружения после завершения теста
+	t.Cleanup(func() {
+		os.Unsetenv("BACKUP_TOOL_DATABASE_TYPE")
+		os.Unsetenv("BACKUP_TOOL_LOGGING_LEVEL")
+	})
+
 	// Загружаем конфигурацию
-	_, err := LoadConfig("path/to/config.yaml")
+	_, err := LoadConfig("test_config.yaml")
 	if err == nil {
 		t.Error("Expected error for invalid values, got nil")
 	}
@@ -86,8 +99,14 @@ func TestLoadConfigInvalidValues(t *testing.T) {
 
 func TestLoadConfigPartialOverride(t *testing.T) {
 	// Устанавливаем переменные окружения для частичного переопределения
-	os.Setenv("DATABASE_HOST", "localhost")
-	os.Setenv("LOGGING_LEVEL", "info")
+	os.Setenv("BACKUP_TOOL_DATABASE_HOST", "localhost")
+	os.Setenv("BACKUP_TOOL_LOGGING_LEVEL", "info")
+
+	// Очищаем переменные окружения после завершения теста
+	t.Cleanup(func() {
+		os.Unsetenv("BACKUP_TOOL_DATABASE_HOST")
+		os.Unsetenv("BACKUP_TOOL_LOGGING_LEVEL")
+	})
 
 	// Загружаем конфигурацию
 	cfg, err := LoadConfig("test_config.yaml")
