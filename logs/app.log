@@ -1,0 +1,3 @@
+INFO: 2025/02/06 16:10:08 logger.go:65: Starting full MySQL backup...
+INFO: 2025/02/06 16:10:08 logger.go:65: MySQL backup completed successfully.
+INFO: 2025/02/06 16:10:08 logger.go:65: Backup completed successfully.
