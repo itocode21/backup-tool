@@ -1,6 +1,7 @@
 package mysql
 
 import (
+	"bytes"
 	"errors"
 	"os"
 	"os/exec"
@@ -16,6 +17,7 @@ type MySQLBackup struct {
 func (m *MySQLBackup) PerformFullBackup(config map[string]string) error {
 	m.Logger.Info("Starting full MySQL backup...")
 
+	// Проверяем обязательные параметры
 	requiredParams := []string{"host", "port", "username", "password", "dbname", "backup-file"}
 	for _, param := range requiredParams {
 		if config[param] == "" {
@@ -23,14 +25,7 @@ func (m *MySQLBackup) PerformFullBackup(config map[string]string) error {
 		}
 	}
 
-	cmd := exec.Command("mysqldump",
-		"--user="+config["username"],
-		"--password="+config["password"],
-		"--host="+config["host"],
-		"--port="+config["port"],
-		config["dbname"],
-	)
-
+	// Создаем директорию для файла бэкапа
 	backupFilePath := config["backup-file"]
 	backupDir := filepath.Dir(backupFilePath)
 	err := os.MkdirAll(backupDir, os.ModePerm)
@@ -47,11 +42,26 @@ func (m *MySQLBackup) PerformFullBackup(config map[string]string) error {
 	}
 	defer outputFile.Close()
 
+	// Формируем команду mysqldump
+	cmd := exec.Command("mysqldump",
+		"--user="+config["username"],
+		"--password="+config["password"],
+		"--host="+config["host"],
+		"--port="+config["port"],
+		config["dbname"],
+	)
+
+	// Перенаправляем stdout в файл
 	cmd.Stdout = outputFile
 
+	// Перенаправляем stderr для логирования ошибок
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
+
+	// Выполняем команду
 	err = cmd.Run()
 	if err != nil {
-		m.Logger.Error("MySQL backup failed: " + err.Error())
+		m.Logger.Error("MySQL backup failed: " + err.Error() + ". Details: " + stderr.String())
 		return err
 	}
 

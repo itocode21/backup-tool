@@ -1,0 +1,4 @@
+INFO: 2025/02/05 13:13:01 logger.go:65: Test info Message
+DEBUG: 2025/02/05 13:13:01 logger.go:81: Test debug Message
+WARN: 2025/02/05 13:13:01 logger.go:70: Test warn Message
+ERROR: 2025/02/05 13:13:01 logger.go:75: Test error Message

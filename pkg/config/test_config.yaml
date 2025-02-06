@@ -3,7 +3,7 @@ database:
   host: localhost
   port: 3306
   username: root
-  password: secret
+  password: ito21
   dbname: mydb
 
 storage:
@@ -12,9 +12,9 @@ storage:
   bucket: my-backup-bucket
 
 logging:
-  level: info
-  file: /var/log/backup-tool.log
-  format: json
+  level: info       # Уровень логирования (info, warn, error, debug)
+  file: "logs/app.log" # Путь к файлу логов
+  format: "text"  
 
 notification:
   slack_webhook_url: https://hooks.slack.com/services/...

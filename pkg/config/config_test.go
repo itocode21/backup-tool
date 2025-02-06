@@ -2,6 +2,7 @@ package config
 
 import (
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -128,5 +129,25 @@ func TestLoadConfigPartialOverride(t *testing.T) {
 	}
 	if cfg.Storage.LocalPath != "/backups" {
 		t.Errorf("Expected local path '/backups', got '%s'", cfg.Storage.LocalPath)
+	}
+}
+
+func TestLoadConfigInvalidCloudType(t *testing.T) {
+	os.Setenv("BACKUP_TOOL_STORAGE_CLOUD_TYPE", "invalid_cloud_type")
+	defer os.Unsetenv("BACKUP_TOOL_STORAGE_CLOUD_TYPE")
+
+	_, err := LoadConfig("test_config.yaml")
+	if err == nil || !strings.Contains(err.Error(), "invalid cloud type") {
+		t.Errorf("Expected error for invalid cloud type, got %v", err)
+	}
+}
+
+func TestLoadConfigInvalidDatabasePort(t *testing.T) {
+	os.Setenv("BACKUP_TOOL_DATABASE_PORT", "not_a_number")
+	defer os.Unsetenv("BACKUP_TOOL_DATABASE_PORT")
+
+	_, err := LoadConfig("test_config.yaml")
+	if err == nil || !strings.Contains(err.Error(), "invalid syntax") {
+		t.Errorf("Expected error for invalid database port, got %v", err)
 	}
 }
