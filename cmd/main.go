@@ -11,7 +11,7 @@ import (
 
 func main() {
 	// Загрузка конфигурации
-	cfg, err := config.LoadConfig("pkg/config/test_config.yaml")
+	cfg, err := config.LoadConfig("pkg/config/test_config_mongodb.yaml")
 	if err != nil {
 		log.Fatalf("Ошибка загрузки конфигурации: %v", err)
 	}
@@ -34,13 +34,8 @@ func main() {
 		"dbname":   cfg.Database.DBName,
 	}
 
-	// Добавляем специфичные параметры для каждой СУБД
-	switch cfg.Database.Type {
-	case "mysql":
-		backupConfig["backup-file"] = "backups/mysql_backup.sql"
-	case "postgresql":
-		backupConfig["backup-file"] = "backups/postgresql_backup.sql"
-	case "mongodb":
+	// Добавляем специфичные параметры для MongoDB
+	if cfg.Database.Type == "mongodb" {
 		backupConfig["backup-path"] = "backups/mongodb_backup"
 	}
 
