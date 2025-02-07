@@ -1,0 +1,20 @@
+database:
+  type: postgresql
+  host: localhost
+  port: 5432
+  username: postgres
+  password: root
+  dbname: postgres
+
+storage:
+  local_path: /backups/pgsql_backup.sql
+  cloud_type: s3
+  bucket: my-backup-bucket
+
+logging:
+  level: info       # Уровень логирования (info, warn, error, debug)
+  file: "logs/app.log" # Путь к файлу логов
+  format: "text"  
+
+notification:
+  slack_webhook_url: https://hooks.slack.com/services/...

@@ -1,8 +1,19 @@
 
-INFO: 2025/02/07 06:53:46 logger.go:65: Starting full MongoDB backup...
-ERROR: 2025/02/07 06:53:47 logger.go:75: MongoDB backup failed: exit status 1. Details: 2025-02-07T06:53:46.974+0300	Failed: can't create session: failed to connect to mongodb://localhost:27017/: connection() error occurred during connection handshake: auth error: sasl conversation error: unable to authenticate using mechanism "SCRAM-SHA-1": (AuthenticationFailed) Authentication failed.
-
-FATAL: 2025/02/07 06:53:47 logger.go:87: Backup failed: exit status 1
-INFO: 2025/02/07 08:00:23 logger.go:65: Starting full MongoDB backup...
-INFO: 2025/02/07 08:00:23 logger.go:65: MongoDB backup completed successfully.
-INFO: 2025/02/07 08:00:23 logger.go:65: Backup completed successfully.
+INFO: 2025/02/07 15:18:45 logger.go:65: Starting full PostgreSQL backup...
+INFO: 2025/02/07 15:18:45 logger.go:65: PostgreSQL backup completed successfully
+INFO: 2025/02/07 15:18:45 logger.go:65: Backup completed successfully.
+INFO: 2025/02/07 15:20:10 logger.go:65: Starting PostgreSQL restore...
+INFO: 2025/02/07 15:20:16 logger.go:65: PostgreSQL restore completed successfully.
+INFO: 2025/02/07 15:20:16 logger.go:65: Restore completed successfully.
+INFO: 2025/02/07 15:21:25 logger.go:65: Starting full MongoDB backup...
+INFO: 2025/02/07 15:21:25 logger.go:65: MongoDB backup completed successfully.
+INFO: 2025/02/07 15:21:25 logger.go:65: Backup completed successfully.
+INFO: 2025/02/07 15:21:38 logger.go:65: Starting MongoDB restore...
+INFO: 2025/02/07 15:21:39 logger.go:65: MongoDB restore completed successfully.
+INFO: 2025/02/07 15:21:39 logger.go:65: Restore completed successfully.
+INFO: 2025/02/07 15:22:37 logger.go:65: Starting full MySQL backup...
+INFO: 2025/02/07 15:22:38 logger.go:65: MySQL backup completed successfully.
+INFO: 2025/02/07 15:22:38 logger.go:65: Backup completed successfully.
+INFO: 2025/02/07 15:22:49 logger.go:65: Starting MySQL restore...
+INFO: 2025/02/07 15:22:49 logger.go:65: MySQL restore completed successfully.
+INFO: 2025/02/07 15:22:49 logger.go:65: Restore completed successfully.

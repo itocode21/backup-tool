@@ -5,6 +5,7 @@ import (
 	"errors"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 
 	"github.com/itocode21/backup-tool/pkg/logging"
@@ -66,5 +67,41 @@ func (m *MongoDBBackup) PerformFullBackup(config map[string]string) error {
 	}
 
 	m.Logger.Info("MongoDB backup completed successfully.")
+	return nil
+}
+
+func (m *MongoDBBackup) RestoreBackup(config map[string]string) error {
+	m.Logger.Info("Starting MongoDB restore...")
+
+	requiredParams := []string{"host", "port", "dbname", "backup-path"}
+	for _, param := range requiredParams {
+		if config[param] == "" {
+			return errors.New("missing required parameter: " + param)
+		}
+	}
+
+	args := []string{
+		"--host", config["host"],
+		"--port", config["port"],
+		filepath.Join(config["backup-path"], config["dbname"]),
+	}
+
+	if config["username"] != "" && config["password"] != "" {
+		args = append(args, "--username", config["username"], "--password", config["password"])
+	}
+
+	cmd := exec.Command("mongorestore", args...)
+
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
+
+	m.Logger.Debug("Executing mongorestore command with arguments: " + strings.Join(cmd.Args, " "))
+	err := cmd.Run()
+	if err != nil {
+		m.Logger.Error("MongoDB restore failed: " + err.Error() + ". Details: " + stderr.String())
+		return err
+	}
+
+	m.Logger.Info("MongoDB restore completed successfully.")
 	return nil
 }
