@@ -1,3 +1,8 @@
-INFO: 2025/02/06 16:10:08 logger.go:65: Starting full MySQL backup...
-INFO: 2025/02/06 16:10:08 logger.go:65: MySQL backup completed successfully.
-INFO: 2025/02/06 16:10:08 logger.go:65: Backup completed successfully.
+
+INFO: 2025/02/07 06:53:46 logger.go:65: Starting full MongoDB backup...
+ERROR: 2025/02/07 06:53:47 logger.go:75: MongoDB backup failed: exit status 1. Details: 2025-02-07T06:53:46.974+0300	Failed: can't create session: failed to connect to mongodb://localhost:27017/: connection() error occurred during connection handshake: auth error: sasl conversation error: unable to authenticate using mechanism "SCRAM-SHA-1": (AuthenticationFailed) Authentication failed.
+
+FATAL: 2025/02/07 06:53:47 logger.go:87: Backup failed: exit status 1
+INFO: 2025/02/07 08:00:23 logger.go:65: Starting full MongoDB backup...
+INFO: 2025/02/07 08:00:23 logger.go:65: MongoDB backup completed successfully.
+INFO: 2025/02/07 08:00:23 logger.go:65: Backup completed successfully.

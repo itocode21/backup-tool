@@ -1,0 +1,21 @@
+database:
+  type: mongodb
+  host: localhost
+  port: 27017
+  username: backup_user
+  password: backup_password
+  dbname: test_db
+  auth-db: admin
+
+storage:
+  local_path: /backups
+  cloud_type: s3
+  bucket: my-backup-bucket
+
+logging:
+  level: info       # Уровень логирования (info, warn, error, debug)
+  file: "logs/app.log" # Путь к файлу логов
+  format: "text"  
+
+notification:
+  slack_webhook_url: https://hooks.slack.com/services/...
