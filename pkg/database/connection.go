@@ -11,6 +11,7 @@ import (
 
 type Backup interface {
 	PerformFullBackup(config map[string]string) error
+	RestoreBackup(config map[string]string) error
 }
 
 // Factory создает экземпляр Backup для конкретной СУБД.

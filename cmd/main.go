@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/itocode21/backup-tool/pkg/config"
 	"github.com/itocode21/backup-tool/pkg/database"
@@ -11,7 +12,7 @@ import (
 
 func main() {
 	// Загрузка конфигурации
-	cfg, err := config.LoadConfig("pkg/config/test_config_mongodb.yaml")
+	cfg, err := config.LoadConfig("pkg/config/test_config.yaml")
 	if err != nil {
 		log.Fatalf("Ошибка загрузки конфигурации: %v", err)
 	}
@@ -25,7 +26,7 @@ func main() {
 		logger.Fatal("Unsupported database type: " + cfg.Database.Type)
 	}
 
-	// Конфигурация для бэкапа
+	// Конфигурация для бэкапа/восстановления
 	backupConfig := map[string]string{
 		"host":     cfg.Database.Host,
 		"port":     fmt.Sprintf("%d", cfg.Database.Port),
@@ -34,12 +35,29 @@ func main() {
 		"dbname":   cfg.Database.DBName,
 	}
 
-	// Добавляем специфичные параметры для MongoDB
-	if cfg.Database.Type == "mongodb" {
+	// Добавляем специфичные параметры для каждой СУБД
+	switch cfg.Database.Type {
+	case "mysql":
+		backupConfig["backup-file"] = "backups/mysql_backup.sql"
+	case "postgresql":
+		backupConfig["backup-file"] = "backups/pgsql_backup.sql"
+	case "mongodb":
 		backupConfig["backup-path"] = "backups/mongodb_backup"
+	default:
+		logger.Fatal("Invalid database type: " + cfg.Database.Type)
 	}
 
-	// Выполнение полного бэкапа
+	// Восстановление данных
+	if len(os.Args) > 1 && os.Args[1] == "restore" {
+		err = backup.RestoreBackup(backupConfig)
+		if err != nil {
+			logger.Fatal("Restore failed: " + err.Error())
+		}
+		logger.Info("Restore completed successfully.")
+		return
+	}
+
+	// Если не указано "restore", выполняем бэкап
 	err = backup.PerformFullBackup(backupConfig)
 	if err != nil {
 		logger.Fatal("Backup failed: " + err.Error())

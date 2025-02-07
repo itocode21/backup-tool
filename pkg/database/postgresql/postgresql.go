@@ -57,3 +57,39 @@ func (p *PostgreSQLBackup) PerformFullBackup(config map[string]string) error {
 	p.Logger.Info("PostgreSQL backup completed successfully")
 	return nil
 }
+
+func (p *PostgreSQLBackup) RestoreBackup(config map[string]string) error {
+	p.Logger.Info("Starting PostgreSQL restore...")
+
+	// Проверяем обязательные параметры
+	requiredParams := []string{"host", "port", "username", "password", "dbname", "backup-file"}
+	for _, param := range requiredParams {
+		if config[param] == "" {
+			return errors.New("missing required parameter: " + param)
+		}
+	}
+
+	// Формируем команду psql
+	cmd := exec.Command("psql",
+		"-U", config["username"],
+		"-h", config["host"],
+		"-p", config["port"],
+		"-d", config["dbname"],
+		"-f", config["backup-file"],
+	)
+
+	// Перенаправляем stderr для логирования ошибок
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
+
+	// Выполняем команду
+	p.Logger.Debug("Executing psql restore command with arguments: " + strings.Join(cmd.Args, " "))
+	err := cmd.Run()
+	if err != nil {
+		p.Logger.Error("PostgreSQL restore failed: " + err.Error() + ". Details: " + stderr.String())
+		return err
+	}
+
+	p.Logger.Info("PostgreSQL restore completed successfully.")
+	return nil
+}

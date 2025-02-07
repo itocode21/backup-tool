@@ -82,9 +82,9 @@ func LoadConfig(path string) (*Config, error) {
 
 	// Проверка допустимых значений для database.type
 	validDatabaseTypes := map[string]bool{
-		"mysql":    true,
-		"postgres": true,
-		"mongodb":  true,
+		"mysql":      true,
+		"postgresql": true,
+		"mongodb":    true,
 	}
 	if !validDatabaseTypes[cfg.Database.Type] {
 		return nil, fmt.Errorf("invalid database type: %s", cfg.Database.Type)
