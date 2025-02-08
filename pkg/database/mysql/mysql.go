@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/itocode21/backup-tool/pkg/logging"
+	"github.com/itocode21/backup-tool/pkg/storage"
 )
 
 type MySQLBackup struct {
@@ -114,5 +115,16 @@ func (m *MySQLBackup) RestoreBackup(config map[string]string) error {
 	}
 
 	m.Logger.Info("MySQL restore completed successfully.")
+	return nil
+}
+
+func (m *MySQLBackup) UploadBackupToStorage(storage storage.Storage, bucket, key, filePath string) error {
+	m.Logger.Info("Uploading MySQL backup to storage...")
+	err := storage.UploadFile(bucket, key, filePath)
+	if err != nil {
+		m.Logger.Error("Failed to upload MySQL backup: " + err.Error())
+		return err
+	}
+	m.Logger.Info("MySQL backup uploaded successfully.")
 	return nil
 }

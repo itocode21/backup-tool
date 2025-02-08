@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/itocode21/backup-tool/pkg/logging"
+	"github.com/itocode21/backup-tool/pkg/storage"
 )
 
 type MongoDBBackup struct {
@@ -103,5 +104,16 @@ func (m *MongoDBBackup) RestoreBackup(config map[string]string) error {
 	}
 
 	m.Logger.Info("MongoDB restore completed successfully.")
+	return nil
+}
+
+func (m *MongoDBBackup) UploadBackupToStorage(storage storage.Storage, bucket, key, filePath string) error {
+	m.Logger.Info("Uploading MongoDB backup to storage...")
+	err := storage.UploadFile(bucket, key, filePath)
+	if err != nil {
+		m.Logger.Error("Failed to upload MongoDB backup: " + err.Error())
+		return err
+	}
+	m.Logger.Info("MongoDB backup uploaded successfully.")
 	return nil
 }

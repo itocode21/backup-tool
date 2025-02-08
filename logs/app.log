@@ -1,19 +1,11 @@
 
-INFO: 2025/02/07 15:18:45 logger.go:65: Starting full PostgreSQL backup...
-INFO: 2025/02/07 15:18:45 logger.go:65: PostgreSQL backup completed successfully
-INFO: 2025/02/07 15:18:45 logger.go:65: Backup completed successfully.
-INFO: 2025/02/07 15:20:10 logger.go:65: Starting PostgreSQL restore...
-INFO: 2025/02/07 15:20:16 logger.go:65: PostgreSQL restore completed successfully.
-INFO: 2025/02/07 15:20:16 logger.go:65: Restore completed successfully.
-INFO: 2025/02/07 15:21:25 logger.go:65: Starting full MongoDB backup...
-INFO: 2025/02/07 15:21:25 logger.go:65: MongoDB backup completed successfully.
-INFO: 2025/02/07 15:21:25 logger.go:65: Backup completed successfully.
-INFO: 2025/02/07 15:21:38 logger.go:65: Starting MongoDB restore...
-INFO: 2025/02/07 15:21:39 logger.go:65: MongoDB restore completed successfully.
-INFO: 2025/02/07 15:21:39 logger.go:65: Restore completed successfully.
-INFO: 2025/02/07 15:22:37 logger.go:65: Starting full MySQL backup...
-INFO: 2025/02/07 15:22:38 logger.go:65: MySQL backup completed successfully.
-INFO: 2025/02/07 15:22:38 logger.go:65: Backup completed successfully.
-INFO: 2025/02/07 15:22:49 logger.go:65: Starting MySQL restore...
-INFO: 2025/02/07 15:22:49 logger.go:65: MySQL restore completed successfully.
-INFO: 2025/02/07 15:22:49 logger.go:65: Restore completed successfully.
+INFO: 2025/02/08 12:43:54 logger.go:65: Starting full backup for postgresql
+INFO: 2025/02/08 12:43:54 logger.go:65: Starting PostgreSQL restore...
+ERROR: 2025/02/08 12:43:59 logger.go:75: PostgreSQL restore failed: exit status 2. Details: psql: error: connection to server at "localhost" (::1), port 5432 failed: ВАЖНО:  пользователь "postgres" не прошёл проверку подлинности (по паролю)
+
+FATAL: 2025/02/08 12:43:59 logger.go:87: Backup failed: exit status 2
+INFO: 2025/02/08 16:04:02 logger.go:65: Starting full MySQL backup...
+INFO: 2025/02/08 16:04:02 logger.go:65: MySQL backup completed successfully.
+INFO: 2025/02/08 16:04:02 logger.go:65: Uploading MySQL backup to storage...
+ERROR: 2025/02/08 16:04:07 logger.go:75: Failed to upload MySQL backup: failed to upload file to S3: operation error S3: PutObject, get identity: get credentials: failed to refresh cached credentials, no EC2 IMDS role found, operation error ec2imds: GetMetadata, request canceled, context deadline exceeded
+FATAL: 2025/02/08 16:04:07 logger.go:87: Failed to upload backup to storage: failed to upload file to S3: operation error S3: PutObject, get identity: get credentials: failed to refresh cached credentials, no EC2 IMDS role found, operation error ec2imds: GetMetadata, request canceled, context deadline exceeded
