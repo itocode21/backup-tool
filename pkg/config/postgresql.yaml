@@ -2,9 +2,9 @@ database:
   type: postgresql
   host: localhost
   port: 5432
-  username: postgres
-  password: root
-  dbname: postgres
+  username: u-username
+  password: u-password
+  dbname: u-db-name
 
 storage:
   local_path: data/backups
