@@ -7,14 +7,14 @@ database:
   dbname: mydb
 
 storage:
-  local_path: /backups
+  local_path:  data/backups
   cloud_type: s3
   bucket: my-backup-bucket
 
 logging:
-  level: info       # Уровень логирования (info, warn, error, debug)
-  file: "logs/app.log" # Путь к файлу логов
-  format: "text"  
+  level: info    
+  file: data/logs/app.log
+  format: text 
 
 notification:
   slack_webhook_url: https://hooks.slack.com/services/...

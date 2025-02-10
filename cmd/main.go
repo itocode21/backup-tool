@@ -1,9 +1,11 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 
 	"github.com/itocode21/backup-tool/pkg/config"
 	"github.com/itocode21/backup-tool/pkg/database"
@@ -11,57 +13,73 @@ import (
 )
 
 func main() {
+	// Определение флагов
+	configPath := flag.String("config", "", "Path to the configuration file (required)")
+	dbType := flag.String("type", "", "Database type (mysql|postgresql|mongodb) (required)")
+	command := flag.String("command", "", "Command to execute (backup|restore) (required)")
+	backupFile := flag.String("backup-file", "", "Path to the backup file (optional for restore/backup)")
+	flag.Parse()
+
+	// Проверка обязательных параметров
+	if *configPath == "" || *dbType == "" || *command == "" {
+		log.Fatal("Missing required parameters: --config, --type, and --command are required.")
+	}
+
+	// Разрешение пути к конфигурации
+	fullConfigPath := *configPath
+	if !filepath.IsAbs(*configPath) {
+		// Если путь не абсолютный, добавляем рабочую директорию
+		workingDir, err := os.Getwd()
+		if err != nil {
+			log.Fatalf("Failed to get working directory: %v", err)
+		}
+		fullConfigPath = filepath.Join(workingDir, *configPath)
+	}
+
 	// Загрузка конфигурации
-	cfg, err := config.LoadConfig("pkg/config/test_config.yaml")
+	cfg, err := config.LoadConfig(fullConfigPath)
 	if err != nil {
-		log.Fatalf("Ошибка загрузки конфигурации: %v", err)
+		log.Fatalf("Failed to load config: %v", err)
 	}
 
 	// Инициализация логгера
 	logger := logging.NewLogger(cfg)
 
-	// Создание экземпляра Backup для выбранной СУБД
-	backup, err := database.NewBackup(cfg.Database.Type, logger)
+	// Создание экземпляра Backup
+	backup, err := database.NewBackup(*dbType, logger)
 	if err != nil {
-		logger.Fatal("Unsupported database type: " + cfg.Database.Type)
+		log.Fatalf("Failed to create backup instance: %v", err)
 	}
 
-	// Конфигурация для бэкапа/восстановления
-	backupConfig := map[string]string{
-		"host":     cfg.Database.Host,
-		"port":     fmt.Sprintf("%d", cfg.Database.Port),
-		"username": cfg.Database.Username,
-		"password": cfg.Database.Password,
-		"dbname":   cfg.Database.DBName,
-	}
-
-	// Добавляем специфичные параметры для каждой СУБД
-	switch cfg.Database.Type {
-	case "mysql":
-		backupConfig["backup-file"] = "backups/mysql_backup.sql"
-	case "postgresql":
-		backupConfig["backup-file"] = "backups/pgsql_backup.sql"
-	case "mongodb":
-		backupConfig["backup-path"] = "backups/mongodb_backup"
-	default:
-		logger.Fatal("Invalid database type: " + cfg.Database.Type)
-	}
-
-	// Восстановление данных
-	if len(os.Args) > 1 && os.Args[1] == "restore" {
-		err = backup.RestoreBackup(backupConfig)
-		if err != nil {
-			logger.Fatal("Restore failed: " + err.Error())
+	// Выполнение команды
+	switch *command {
+	case "backup":
+		config := map[string]string{
+			"host":        cfg.Database.Host,
+			"port":        fmt.Sprintf("%d", cfg.Database.Port),
+			"username":    cfg.Database.Username,
+			"password":    cfg.Database.Password,
+			"dbname":      cfg.Database.DBName,
+			"backup-file": *backupFile,
 		}
-		logger.Info("Restore completed successfully.")
-		return
+		if err := backup.PerformFullBackup(config); err != nil {
+			log.Fatalf("Backup failed: %v", err)
+		}
+		fmt.Println("Backup completed successfully.")
+	case "restore":
+		config := map[string]string{
+			"host":        cfg.Database.Host,
+			"port":        fmt.Sprintf("%d", cfg.Database.Port),
+			"username":    cfg.Database.Username,
+			"password":    cfg.Database.Password,
+			"dbname":      cfg.Database.DBName,
+			"backup-file": *backupFile,
+		}
+		if err := backup.RestoreBackup(config); err != nil {
+			log.Fatalf("Restore failed: %v", err)
+		}
+		fmt.Println("Restore completed successfully.")
+	default:
+		log.Fatalf("Unknown command: %s", *command)
 	}
-
-	// Если не указано "restore", выполняем бэкап
-	err = backup.PerformFullBackup(backupConfig)
-	if err != nil {
-		logger.Fatal("Backup failed: " + err.Error())
-	}
-
-	logger.Info("Backup completed successfully.")
 }

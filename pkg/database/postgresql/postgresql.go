@@ -18,21 +18,30 @@ type PostgreSQLBackup struct {
 func (p *PostgreSQLBackup) PerformFullBackup(config map[string]string) error {
 	p.Logger.Info("Starting full PostgreSQL backup...")
 
-	requiredParams := []string{"host", "port", "username", "password", "dbname", "backup-file"}
+	// Проверка обязательных параметров
+	requiredParams := []string{"host", "port", "username", "password", "dbname"}
 	for _, param := range requiredParams {
 		if config[param] == "" {
 			return errors.New("missing required parameter: " + param)
 		}
 	}
 
+	// Установка пути к файлу резервной копии
+	defaultBackupFile := filepath.Join("backups", "postgresql", config["dbname"]+".sql")
 	backupFilePath := config["backup-file"]
-	backupDir := strings.TrimSuffix(backupFilePath, filepath.Base(backupFilePath))
+	if backupFilePath == "" {
+		backupFilePath = defaultBackupFile
+	}
+
+	// Создание директории для резервной копии
+	backupDir := filepath.Dir(backupFilePath)
 	err := os.MkdirAll(backupDir, os.ModePerm)
 	if err != nil {
 		p.Logger.Error("Failed to create backup directory: " + err.Error())
-		return nil
+		return err
 	}
 
+	// Подготовка команды pg_dump
 	cmd := exec.Command("pg_dump",
 		"-U", config["username"],
 		"-h", config["host"],
@@ -40,28 +49,26 @@ func (p *PostgreSQLBackup) PerformFullBackup(config map[string]string) error {
 		"-d", config["dbname"],
 		"-f", backupFilePath,
 	)
-
 	os.Setenv("PGPASSWORD", config["password"])
 	defer os.Unsetenv("PGPASSWORD")
 
+	// Выполнение команды pg_dump
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
-
 	p.Logger.Debug("Executing pg_dump command with arguments: " + strings.Join(cmd.Args, " "))
 	err = cmd.Run()
 	if err != nil {
-		p.Logger.Error("PostgreSQL backup failed: " + err.Error() + ". Detaild: " + stderr.String())
-		return nil
+		p.Logger.Error("PostgreSQL backup failed: " + err.Error() + ". Details: " + stderr.String())
+		return err
 	}
 
-	p.Logger.Info("PostgreSQL backup completed successfully")
+	p.Logger.Info("PostgreSQL backup completed successfully. File saved to: " + backupFilePath)
 	return nil
 }
 
 func (p *PostgreSQLBackup) RestoreBackup(config map[string]string) error {
 	p.Logger.Info("Starting PostgreSQL restore...")
 
-	// Проверяем обязательные параметры
 	requiredParams := []string{"host", "port", "username", "password", "dbname", "backup-file"}
 	for _, param := range requiredParams {
 		if config[param] == "" {
@@ -69,7 +76,6 @@ func (p *PostgreSQLBackup) RestoreBackup(config map[string]string) error {
 		}
 	}
 
-	// Формируем команду psql
 	cmd := exec.Command("psql",
 		"-U", config["username"],
 		"-h", config["host"],
@@ -78,11 +84,9 @@ func (p *PostgreSQLBackup) RestoreBackup(config map[string]string) error {
 		"-f", config["backup-file"],
 	)
 
-	// Перенаправляем stderr для логирования ошибок
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
 
-	// Выполняем команду
 	p.Logger.Debug("Executing psql restore command with arguments: " + strings.Join(cmd.Args, " "))
 	err := cmd.Run()
 	if err != nil {
