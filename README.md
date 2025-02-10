@@ -9,7 +9,8 @@ Backup Tool — это инструмент командной строки (CLI
 ## Требования
 * Go 1.23+
 * Docker (Для запуска через контейнеры)
-* Установленные утилиты ```mysqldump```, ```mysql``` (для MySQL)
+* Установленные утилиты 
+    ```mysqldump```, ```mysql``` (для MySQL)
     ```pg_dump```, ```psql``` (для PostgreSQL)
     ```mongodump```, ```mongorestore``` (для MongoDB)
 
