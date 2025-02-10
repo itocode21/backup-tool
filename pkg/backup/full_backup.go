@@ -16,6 +16,7 @@ func NewBackupManager(dbtype string, logger *logging.Logger) (*BackupManager, er
 	if err != nil {
 		return nil, err
 	}
+
 	return &BackupManager{
 		DatabaseType: dbtype,
 		Backup:       backup,
@@ -29,6 +30,6 @@ func (b *BackupManager) PerformFullBackup(config map[string]string) error {
 }
 
 func (b *BackupManager) RestoreBackup(config map[string]string) error {
-	b.Logger.Info("starting restore for " + b.DatabaseType)
+	b.Logger.Info("Starting restore for " + b.DatabaseType)
 	return b.Backup.RestoreBackup(config)
 }

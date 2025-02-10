@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/itocode21/backup-tool/pkg/logging"
-	"github.com/itocode21/backup-tool/pkg/storage"
 )
 
 type MySQLBackup struct {
@@ -19,16 +18,14 @@ type MySQLBackup struct {
 func (m *MySQLBackup) PerformFullBackup(config map[string]string) error {
 	m.Logger.Info("Starting full MySQL backup...")
 
-	// Проверяем обязательные параметры
-	requiredParams := []string{"host", "port", "username", "password", "dbname", "backup-file"}
-	for _, param := range requiredParams {
-		if config[param] == "" {
-			return errors.New("missing required parameter: " + param)
-		}
+	// Установка пути к резервной копии
+	defaultBackupPath := filepath.Join("backups", "mysql", config["dbname"]+".sql")
+	backupFilePath := config["backup-file"]
+	if backupFilePath == "" {
+		backupFilePath = defaultBackupPath
 	}
 
-	// Создаем директорию для файла бэкапа
-	backupFilePath := config["backup-file"]
+	// Создание директории, если она не существует
 	backupDir := filepath.Dir(backupFilePath)
 	err := os.MkdirAll(backupDir, os.ModePerm)
 	if err != nil {
@@ -36,7 +33,7 @@ func (m *MySQLBackup) PerformFullBackup(config map[string]string) error {
 		return err
 	}
 
-	// Создаем файл для бэкапа
+	// Создание файла резервной копии
 	outputFile, err := os.Create(backupFilePath)
 	if err != nil {
 		m.Logger.Error("Failed to create backup file: " + err.Error())
@@ -44,7 +41,7 @@ func (m *MySQLBackup) PerformFullBackup(config map[string]string) error {
 	}
 	defer outputFile.Close()
 
-	// Формируем команду mysqldump
+	// Выполнение mysqldump
 	cmd := exec.Command("mysqldump",
 		"--user="+config["username"],
 		"--password="+config["password"],
@@ -52,29 +49,24 @@ func (m *MySQLBackup) PerformFullBackup(config map[string]string) error {
 		"--port="+config["port"],
 		config["dbname"],
 	)
-
-	// Перенаправляем stdout в файл
 	cmd.Stdout = outputFile
-
-	// Перенаправляем stderr для логирования ошибок
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
 
-	// Выполняем команду
+	m.Logger.Debug("Executing mysqldump command with arguments: " + strings.Join(cmd.Args, " "))
 	err = cmd.Run()
 	if err != nil {
 		m.Logger.Error("MySQL backup failed: " + err.Error() + ". Details: " + stderr.String())
 		return err
 	}
 
-	m.Logger.Info("MySQL backup completed successfully.")
+	m.Logger.Info("MySQL backup completed successfully. File saved to: " + backupFilePath)
 	return nil
 }
 
 func (m *MySQLBackup) RestoreBackup(config map[string]string) error {
 	m.Logger.Info("Starting MySQL restore...")
 
-	// Проверяем обязательные параметры
 	requiredParams := []string{"host", "port", "username", "password", "dbname", "backup-file"}
 	for _, param := range requiredParams {
 		if config[param] == "" {
@@ -82,7 +74,6 @@ func (m *MySQLBackup) RestoreBackup(config map[string]string) error {
 		}
 	}
 
-	// Формируем команду mysql
 	cmd := exec.Command("mysql",
 		"--user="+config["username"],
 		"--password="+config["password"],
@@ -91,7 +82,6 @@ func (m *MySQLBackup) RestoreBackup(config map[string]string) error {
 		config["dbname"],
 	)
 
-	// Открываем файл бэкапа
 	backupFile, err := os.Open(config["backup-file"])
 	if err != nil {
 		m.Logger.Error("Failed to open backup file: " + err.Error())
@@ -99,14 +89,11 @@ func (m *MySQLBackup) RestoreBackup(config map[string]string) error {
 	}
 	defer backupFile.Close()
 
-	// Передаем содержимое файла в stdin команды mysql
 	cmd.Stdin = backupFile
 
-	// Перенаправляем stderr для логирования ошибок
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
 
-	// Выполняем команду
 	m.Logger.Debug("Executing mysql restore command with arguments: " + strings.Join(cmd.Args, " "))
 	err = cmd.Run()
 	if err != nil {
@@ -115,16 +102,5 @@ func (m *MySQLBackup) RestoreBackup(config map[string]string) error {
 	}
 
 	m.Logger.Info("MySQL restore completed successfully.")
-	return nil
-}
-
-func (m *MySQLBackup) UploadBackupToStorage(storage storage.Storage, bucket, key, filePath string) error {
-	m.Logger.Info("Uploading MySQL backup to storage...")
-	err := storage.UploadFile(bucket, key, filePath)
-	if err != nil {
-		m.Logger.Error("Failed to upload MySQL backup: " + err.Error())
-		return err
-	}
-	m.Logger.Info("MySQL backup uploaded successfully.")
 	return nil
 }

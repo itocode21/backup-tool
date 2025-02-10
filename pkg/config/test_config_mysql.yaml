@@ -1,21 +1,20 @@
 database:
-  type: mongodb
+  type: mysql
   host: localhost
-  port: 27017
-  username: backup_user
-  password: backup_password
-  dbname: test_db
-  auth-db: admin
+  port: 3306
+  username: root
+  password: ito21
+  dbname: mydb
 
 storage:
-  local_path: data/backups
+  local_path:  data/backups
   cloud_type: s3
   bucket: my-backup-bucket
 
 logging:
-  level: debug       
+  level: info    
   file: data/logs/app.log
-  format: "text"
+  format: text 
 
 notification:
   slack_webhook_url: https://hooks.slack.com/services/...
