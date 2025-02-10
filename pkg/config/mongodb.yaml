@@ -2,10 +2,10 @@ database:
   type: mongodb
   host: localhost
   port: 27017
-  username: backup_user
-  password: backup_password
-  dbname: test_db
-  auth-db: admin
+  username: u-username
+  password: u-password
+  dbname: u-db-name
+  auth-db: admin(if need auth)
 
 storage:
   local_path: data/backups

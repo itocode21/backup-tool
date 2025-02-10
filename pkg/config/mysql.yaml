@@ -2,9 +2,9 @@ database:
   type: mysql
   host: localhost
   port: 3306
-  username: root
-  password: ito21
-  dbname: mydb
+  username: u-username
+  password: u-password
+  dbname: u-db-name
 
 storage:
   local_path:  data/backups
