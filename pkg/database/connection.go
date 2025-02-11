@@ -14,7 +14,6 @@ type Backup interface {
 	RestoreBackup(config map[string]string) error
 }
 
-// Factory создает экземпляр Backup для конкретной СУБД.
 func NewBackup(dbType string, logger *logging.Logger) (Backup, error) {
 	switch dbType {
 	case "mysql":
