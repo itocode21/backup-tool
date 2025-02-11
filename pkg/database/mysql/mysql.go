@@ -18,14 +18,12 @@ type MySQLBackup struct {
 func (m *MySQLBackup) PerformFullBackup(config map[string]string) error {
 	m.Logger.Info("Starting full MySQL backup...")
 
-	// Установка пути к резервной копии
 	defaultBackupPath := filepath.Join("backups", "mysql", config["dbname"]+".sql")
 	backupFilePath := config["backup-file"]
 	if backupFilePath == "" {
 		backupFilePath = defaultBackupPath
 	}
 
-	// Создание директории, если она не существует
 	backupDir := filepath.Dir(backupFilePath)
 	err := os.MkdirAll(backupDir, os.ModePerm)
 	if err != nil {
@@ -33,7 +31,6 @@ func (m *MySQLBackup) PerformFullBackup(config map[string]string) error {
 		return err
 	}
 
-	// Создание файла резервной копии
 	outputFile, err := os.Create(backupFilePath)
 	if err != nil {
 		m.Logger.Error("Failed to create backup file: " + err.Error())
@@ -41,7 +38,6 @@ func (m *MySQLBackup) PerformFullBackup(config map[string]string) error {
 	}
 	defer outputFile.Close()
 
-	// Выполнение mysqldump
 	cmd := exec.Command("mysqldump",
 		"--user="+config["username"],
 		"--password="+config["password"],
