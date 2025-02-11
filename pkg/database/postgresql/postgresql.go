@@ -18,7 +18,6 @@ type PostgreSQLBackup struct {
 func (p *PostgreSQLBackup) PerformFullBackup(config map[string]string) error {
 	p.Logger.Info("Starting full PostgreSQL backup...")
 
-	// Проверка обязательных параметров
 	requiredParams := []string{"host", "port", "username", "password", "dbname"}
 	for _, param := range requiredParams {
 		if config[param] == "" {
@@ -26,14 +25,12 @@ func (p *PostgreSQLBackup) PerformFullBackup(config map[string]string) error {
 		}
 	}
 
-	// Установка пути к файлу резервной копии
 	defaultBackupFile := filepath.Join("backups", "postgresql", config["dbname"]+".sql")
 	backupFilePath := config["backup-file"]
 	if backupFilePath == "" {
 		backupFilePath = defaultBackupFile
 	}
 
-	// Создание директории для резервной копии
 	backupDir := filepath.Dir(backupFilePath)
 	err := os.MkdirAll(backupDir, os.ModePerm)
 	if err != nil {
@@ -41,7 +38,6 @@ func (p *PostgreSQLBackup) PerformFullBackup(config map[string]string) error {
 		return err
 	}
 
-	// Подготовка команды pg_dump
 	cmd := exec.Command("pg_dump",
 		"-U", config["username"],
 		"-h", config["host"],
@@ -52,7 +48,6 @@ func (p *PostgreSQLBackup) PerformFullBackup(config map[string]string) error {
 	os.Setenv("PGPASSWORD", config["password"])
 	defer os.Unsetenv("PGPASSWORD")
 
-	// Выполнение команды pg_dump
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
 	p.Logger.Debug("Executing pg_dump command with arguments: " + strings.Join(cmd.Args, " "))
