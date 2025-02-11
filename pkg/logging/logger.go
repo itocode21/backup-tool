@@ -22,7 +22,6 @@ type Logger struct {
 func NewLogger(cfg *config.Config) *Logger {
 	var outputs []io.Writer
 
-	// Добавляем вывод в файл, если путь указан
 	if cfg.Logging.File != "" {
 		logDir := filepath.Dir(cfg.Logging.File)
 		err := os.MkdirAll(logDir, os.ModePerm)
@@ -36,10 +35,8 @@ func NewLogger(cfg *config.Config) *Logger {
 		outputs = append(outputs, file)
 	}
 
-	// Добавляем вывод в консоль
 	outputs = append(outputs, os.Stdout)
 
-	// Создаем MultiWriter для записи в несколько мест
 	multiWriter := io.MultiWriter(outputs...)
 
 	logger := &Logger{
