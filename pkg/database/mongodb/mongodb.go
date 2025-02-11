@@ -19,7 +19,6 @@ type MongoDBBackup struct {
 func (m *MongoDBBackup) PerformFullBackup(config map[string]string) error {
 	m.Logger.Info("Starting full MongoDB backup...")
 
-	// Проверка обязательных параметров
 	requiredParams := []string{"host", "port", "dbname", "backup-file"}
 	for _, param := range requiredParams {
 		if config[param] == "" {
@@ -27,23 +26,20 @@ func (m *MongoDBBackup) PerformFullBackup(config map[string]string) error {
 		}
 	}
 
-	// Установка пути к файлу резервной копии
 	backupFilePath := config["backup-file"]
 	backupDir := filepath.Dir(backupFilePath)
 
-	// Создание директории для резервной копии
 	err := os.MkdirAll(backupDir, os.ModePerm)
 	if err != nil {
 		m.Logger.Error("Failed to create backup directory: " + err.Error())
 		return err
 	}
 
-	// Подготовка аргументов для mongodump
 	args := []string{
 		"--host", config["host"],
 		"--port", config["port"],
 		"--db", config["dbname"],
-		"--out", backupDir, // Используем директорию
+		"--out", backupDir, 
 	}
 	if config["username"] != "" && config["password"] != "" {
 		args = append(args, "--username", config["username"], "--password", config["password"])
@@ -54,7 +50,6 @@ func (m *MongoDBBackup) PerformFullBackup(config map[string]string) error {
 		}
 	}
 
-	// Выполнение команды mongodump
 	cmd := exec.Command("mongodump", args...)
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
