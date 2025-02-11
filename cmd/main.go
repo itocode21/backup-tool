@@ -13,22 +13,18 @@ import (
 )
 
 func main() {
-	// Определение флагов
 	configPath := flag.String("config", "", "Path to the configuration file (required)")
 	dbType := flag.String("type", "", "Database type (mysql|postgresql|mongodb) (required)")
 	command := flag.String("command", "", "Command to execute (backup|restore) (required)")
 	backupFile := flag.String("backup-file", "", "Path to the backup file (optional for restore/backup)")
 	flag.Parse()
 
-	// Проверка обязательных параметров
 	if *configPath == "" || *dbType == "" || *command == "" {
 		log.Fatal("Missing required parameters: --config, --type, and --command are required.")
 	}
 
-	// Разрешение пути к конфигурации
 	fullConfigPath := *configPath
-	if !filepath.IsAbs(*configPath) {
-		// Если путь не абсолютный, добавляем рабочую директорию
+	if !filepath.IsAbs(*configPath) {	
 		workingDir, err := os.Getwd()
 		if err != nil {
 			log.Fatalf("Failed to get working directory: %v", err)
@@ -36,22 +32,18 @@ func main() {
 		fullConfigPath = filepath.Join(workingDir, *configPath)
 	}
 
-	// Загрузка конфигурации
 	cfg, err := config.LoadConfig(fullConfigPath)
 	if err != nil {
 		log.Fatalf("Failed to load config: %v", err)
 	}
 
-	// Инициализация логгера
 	logger := logging.NewLogger(cfg)
 
-	// Создание экземпляра Backup
 	backup, err := database.NewBackup(*dbType, logger)
 	if err != nil {
 		log.Fatalf("Failed to create backup instance: %v", err)
 	}
 
-	// Выполнение команды
 	switch *command {
 	case "backup":
 		config := map[string]string{
